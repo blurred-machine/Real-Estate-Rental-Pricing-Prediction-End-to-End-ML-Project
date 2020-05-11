@@ -2,31 +2,34 @@
 * (Under Development)
 To build an application which predicts the monthly rental of a house based on the given attributes.
 
+### About
+- An application which predicts the monthly rental of a house based on the given attributes.
+- A Macine Learning Project focused on predicting house prices for a house purchase.
+
 
 ### Attributes: 
 - `Id`: listing id
 - `url`: listing URL
 - `region`: craigslist region
-- region_url: region URL
-- price: rent per month (Target Column)
-type: housing type
-sqfeet: total square footage
-beds:number of beds
-baths:number of bathrooms
-cats_allowed: cats allowed boolean (1 = yes, 0 = no)
-dogs_allowed: dogs allowed boolean
-smoking_allowed: smoking allowed boolean
-wheelchair_access: has wheelchair access boolean
-electric_vehicle_charge: has electric vehicle charger boolean
-comes_furnished: comes with furniture boolean
-laundry_options: laundry options available
-parking_options: parking options available
-image_url: image URL
-description: description by poster
-lat: latitude
-long: longitude
-state: state of listing
-
+- `region_url`: region URL
+- `type`: housing type
+- `sqfeet`: total square footage
+- `beds`:number of beds
+- `baths`:number of bathrooms
+- `cats_allowed`: cats allowed boolean (1 = yes, 0 = no)
+- `dogs_allowed`: dogs allowed boolean
+- `smoking_allowed`: smoking allowed boolean
+- `wheelchair_access`: has wheelchair access boolean
+- `electric_vehicle_charge`: has electric vehicle charger boolean
+- `comes_furnished`: comes with furniture boolean
+- `laundry_options`: laundry options available
+- `parking_options`: parking options available
+- `image_url`: image URL
+- `description`: description by poster
+- `lat`: latitude
+- `long`: longitude
+- `state`: state of listing
+- `price`: rent per month (Target Column)
 
 
 ### Dataset Citation:
