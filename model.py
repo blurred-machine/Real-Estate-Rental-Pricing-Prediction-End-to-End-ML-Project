@@ -18,42 +18,23 @@ warnings.filterwarnings("ignore")
 
 from sklearn.preprocessing import MinMaxScaler
 
-from scipy.stats import chi2_contingency
-
-import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
-from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
-from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV
-from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import PowerTransformer
 
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import f1_score
 from sklearn import metrics as skmetrics
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 
 from sklearn.cluster import KMeans
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import SVC
-from sklearn.multioutput import MultiOutputClassifier
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.naive_bayes import GaussianNB
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import KFold, cross_val_score, train_test_split
-from sklearn.metrics import classification_report,confusion_matrix
-import xgboost as xgb
+from sklearn.model_selection import train_test_split
+
 
 
 #///////////////////////////////////////////////////////////////////////
-raw_df = pd.read_csv("cardio_train.csv", sep=";")
+df = pd.read_csv("housing_train.csv")
 #///////////////////////////////////////////////////////////////////////
-print(raw_df.duplicated().sum())
-raw_df.drop_duplicates(inplace=True)
+print(df.duplicated().sum())
+df.drop_duplicates(inplace=True)
 
 def feature_outlier_removal(data, feature, min_q, max_q):
     feature_min_outlier_mask = data[feature] > data[feature].quantile(min_q)
@@ -194,6 +175,7 @@ fig, axes = plt.subplots(figsize=(10,10))
 plt.scatter(x=clean_df['lat'], y=clean_df['long'], c=lat_long_pred)
 plt.show()
 #///////////////////////////////////////////////////////////////////////
+'''
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer 
 sid_obj = SentimentIntensityAnalyzer()
 
@@ -211,9 +193,9 @@ for i in tqdm(range(loop), position=0, leave=True):
 desc_df = pd.DataFrame(description_dict)
 print(desc_df.shape)
 desc_df.head()
-
-#///////////////////////////////////////////////////////////////////////
 clean_df = pd.concat([clean_df, desc_df], axis=1)
+'''
+#///////////////////////////////////////////////////////////////////////
 clean_df = clean_df.drop(["description"], axis=1)
 #///////////////////////////////////////////////////////////////////////
 clean_df.corr()
@@ -231,10 +213,14 @@ print(df.head())
 #///////////////////////////////////////////////////////////////////////
 df_X = df.drop(["id", "price"], axis=1)
 df_y = df.loc[:, "price"]
+
+joblib.dump(df_X.columns, './pickles/data_columns.pkl') 
 #///////////////////////////////////////////////////////////////////////
 scaler = MinMaxScaler()
 df_X = scaler.fit_transform(df_X)
 print(df_X)
+
+joblib.dump(scaler, './pickles/min_max_scaler.pkl') 
 #///////////////////////////////////////////////////////////////////////
 X_train, X_test, y_train, y_test = train_test_split(df_X, df_y, 
                                                     test_size=0.2, 
@@ -245,7 +231,7 @@ def calculate_regression_metrics(y_test, predictions):
     mae = skmetrics.mean_absolute_error(y_test, predictions)
     r2_error = skmetrics.r2_score(y_test, predictions)
 
-    result = {'mean_squared_error': mse, 'mean_absolute_error': mae, 'r2_score': r2_error}
+    result = {'MSE': mse, 'MAE': mae, 'R2 score': r2_error}
     return result 
 #///////////////////////////////////////////////////////////////////////
 regressor_model = RandomForestRegressor()
@@ -258,7 +244,7 @@ print("//////////////////////////////////////")
 print(y_test)
 print("//////////////////////////////////////")
 
-calculate_regression_metrics(y_test, pred)
+print(calculate_regression_metrics(y_test, pred))
 #///////////////////////////////////////////////////////////////////////
 
 #///////////////////////////////////////////////////////////////////////
@@ -270,7 +256,7 @@ calculate_regression_metrics(y_test, pred)
 #///////////////////////////////////////////////////////////////////////
 
 #///////////////////////////////////////////////////////////////////////
-joblib.dump(model, './pickles/classifier_model.pkl') 
+joblib.dump(regressor_model, './pickles/regressor_model.pkl') 
 
 
 
