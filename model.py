@@ -31,6 +31,7 @@ from sklearn.preprocessing import PowerTransformer
 
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import f1_score
+from sklearn import metrics as skmetrics
 
 from sklearn.cluster import KMeans
 from sklearn.neighbors import KNeighborsClassifier
@@ -52,155 +53,225 @@ raw_df = pd.read_csv("cardio_train.csv", sep=";")
 print(raw_df.duplicated().sum())
 raw_df.drop_duplicates(inplace=True)
 
-def feature_outlier_removal(df, feature, min_q, max_q):
-    feature_min_outlier_mask = df[feature] > df[feature].quantile(min_q)
-    feature_max_outlier_mask = df[feature] < df[feature].quantile(max_q)
-    df = df[(feature_min_outlier_mask) & (feature_max_outlier_mask)]
-    print(feature, "min: ", df[feature].quantile(min_q))
-    print(feature, "max: ", df[feature].quantile(max_q))
-    return df
+def feature_outlier_removal(data, feature, min_q, max_q):
+    feature_min_outlier_mask = data[feature] > data[feature].quantile(min_q)
+    feature_max_outlier_mask = data[feature] < data[feature].quantile(max_q)
+    data = data[(feature_min_outlier_mask) & (feature_max_outlier_mask)]
+    print(feature, "min: ", min(data[feature]))
+    print(feature, "max: ", max(data[feature]))
+    return data
 
-raw_df = feature_outlier_removal(raw_df, "height", 0.005, 0.999)
-raw_df = feature_outlier_removal(raw_df, "weight", 0.001, 0.999)
-#///////////////////////////////////////////////////////////////////////
-raw_df['age'] = round(raw_df['age']/365.25).apply(lambda x: int(x))
-raw_df['gender']= raw_df['gender'].apply(lambda x: 0 if x==2 else 1)
-raw_df = raw_df[raw_df['ap_hi'] > raw_df['ap_lo']].reset_index(drop=True)
-#///////////////////////////////////////////////////////////////////////
-def find_bmi(data):
-    bmi = data['weight']/((data['height']/100)**2)
-    return bmi
+def numerical_outlier_removal(data):
+    data = feature_outlier_removal(data, "price", 0.01, 0.999)
+    data = feature_outlier_removal(data, "sqfeet", 0.002, 0.999)
+    return data
 
-raw_df['bmi'] = raw_df.apply(find_bmi, axis=1)
+raw_df = numerical_outlier_removal(df)
+print("\nOutliers Removed :", df.shape[0] - raw_df.shape[0])
+print("Data Shape: ", raw_df.shape[0])
 #///////////////////////////////////////////////////////////////////////
-def bp_level(data):
-    if (data['ap_hi'] <= 120) and (data['ap_lo'] <= 80):
-        return 'normal'
-    if (data['ap_hi'] >= 120 and data['ap_hi'] < 129) and (data['ap_lo'] < 80):
-        return 'above_normal'
-    if (data['ap_hi'] >= 129 and data['ap_hi'] < 139) | (data['ap_lo'] >= 80 and data['ap_lo'] < 89):
-        return 'high'
-    if (data['ap_hi'] >= 139) | (data['ap_lo'] >= 89):
-        return 'very_high'
-    if (data['ap_hi'] >= 180) | (data['ap_lo'] >= 120):
-        return 'extreme_high'
+raw_df = raw_df[raw_df['beds'] <= 6] 
+raw_df = raw_df[raw_df['baths'] <= 3.5] 
+print("Data Shape: ", raw_df.shape[0])
+#///////////////////////////////////////////////////////////////////////
+lat_min_mask = raw_df['lat'] >= 19.50139
+lat_max_mask = raw_df['lat'] <= 64.85694
+raw_df = raw_df[(lat_min_mask) & (lat_max_mask)]
 
+long_min_mask = raw_df['long'] >= -161.75583
+long_max_mask = raw_df['long'] <= -68.01197
+raw_df = raw_df[(long_min_mask) & (long_max_mask)]
+
+print("lat min: ", min(raw_df.lat))
+print("lat max: ", max(raw_df.lat))
+print("long min: ", min(raw_df.long))
+print("long max: ", max(raw_df.long))
+print("Data Shape: ", raw_df.shape[0])
+#///////////////////////////////////////////////////////////////////////
+def Lat_long_outlier_removal(data):
+    data = feature_outlier_removal(data, "lat", 0.01, 0.999)
+    data = feature_outlier_removal(data, "long", 0.01, 0.999)
+    return data
+
+lat_long_df = Lat_long_outlier_removal(raw_df)
+print("\nOutliers Removed :", raw_df.shape[0] - lat_long_df.shape[0])
+print("Data Shape: ", lat_long_df.shape[0])
+#///////////////////////////////////////////////////////////////////////
+#///////////////////////////////////////////////////////////////////////
+missing = raw_df.isnull().sum()
+missing = missing[missing > 0]
+print(missing)
+missing.sort_values(inplace=True)
+try:
+    missing.plot.bar()
+except:
+    pass
+#///////////////////////////////////////////////////////////////////////
+decide_cols = ["beds", "baths", "cats_allowed", "dogs_allowed", 
+               "smoking_allowed", "wheelchair_access", 
+               "electric_vehicle_charge", "comes_furnished", "price" ]
+
+X_train = raw_df[decide_cols][raw_df["laundry_options"].isna()==False]
+y_train = raw_df["laundry_options"][raw_df["laundry_options"].isna()==False]
+X_test = raw_df[decide_cols][raw_df["laundry_options"].isna()==True]
+ 
+neigh = KNeighborsClassifier(n_neighbors=5)
+neigh.fit(X_train, y_train)
+laundry_pred = neigh.predict(X_test)
+print(laundry_pred)
+print(laundry_pred.size)
+
+# filling missing values
+raw_df["laundry_options"][raw_df["laundry_options"].isna()==True] = laundry_pred
+
+#after imputation
+print(raw_df["laundry_options"].value_counts())
+print(raw_df["laundry_options"].isna().sum())
+#///////////////////////////////////////////////////////////////////////
+decide_cols = ["beds", "baths", "cats_allowed", "dogs_allowed", 
+               "smoking_allowed", "wheelchair_access", "electric_vehicle_charge",
+               "comes_furnished", "price" ]
+
+X_train = raw_df[decide_cols][raw_df["parking_options"].isna()==False]
+y_train = raw_df["parking_options"][raw_df["parking_options"].isna()==False]
+X_test = raw_df[decide_cols][raw_df["parking_options"].isna()==True]
+ 
+neigh = KNeighborsClassifier(n_neighbors=7)
+neigh.fit(X_train, y_train)
+laundry_pred = neigh.predict(X_test)
+print(laundry_pred)
+print(laundry_pred.size)
+
+# filling missing values
+raw_df["parking_options"][raw_df["parking_options"].isna()==True] = laundry_pred
+
+#after imputation
+print(raw_df["parking_options"].value_counts())
+print(raw_df["parking_options"].isna().sum())
+#///////////////////////////////////////////////////////////////////////
+print(raw_df.isnull().sum())
+raw_df.dropna(inplace=True)
+
+clean_df = raw_df.copy()
+clean_df.describe()
+#///////////////////////////////////////////////////////////////////////
+#///////////////////////////////////////////////////////////////////////
+try:
+    clean_df = clean_df.drop(['url', 'region_url', 'image_url'], axis=1)
+except:
+    pass
+#///////////////////////////////////////////////////////////////////////
+def sqfeet_range_column(data, feature='sqfeet'):
+    if data[feature] < 300:
+        return 'single room'
+    if data[feature] >= 300 and data[feature] < 500:
+        return 'mini'
+    if data[feature] >= 500 and data[feature] < 1000:
+        return 'small'
+    if data[feature] >= 1000 and data[feature] < 1500:
+        return 'medium'
+    if data[feature] >= 1500 and data[feature] < 2000:
+        return 'large'
+    if data[feature] >= 2000 and data[feature] < 2500:
+        return 'extra large'
+    if data[feature] >=2500:
+        return 'mansion'
     
-raw_df['bp_level'] = raw_df.apply(bp_level, axis=1)
-#///////////////////////////////////////////////////////////////////////
-def age_level(data):
-    if data["age"] < 40:
-        return '1'
-    if data['age'] >= 40 and data['age'] < 45:
-        return '2'
-    if data['age'] >= 45 and data['age'] < 50:
-        return '3'
-    if data['age'] >= 50 and data['age'] < 55:
-        return '4'
-    if data['age'] >= 55 and data['age'] < 60:
-        return '5'
-    if data['age'] >= 60:
-        return '6'
 
-    
-raw_df['age_level'] = raw_df.apply(age_level, axis=1)
+clean_df['sqfeet_range'] = clean_df.apply(sqfeet_range_column, axis=1)
+clean_df.sqfeet_range.value_counts()
 #///////////////////////////////////////////////////////////////////////
-def bmi_level(data):
-    if data['bmi'] <= 18.5:
-        return 'underweight'
-    if data['bmi'] > 18.5 and data['bmi'] <= 24.9:
-        return 'normal'
-    if data['bmi'] > 24.9 and data['bmi'] <= 29.9:
-        return 'overweight'
-    if data['bmi'] >= 29.9:
-        return 'obese'
-    
-raw_df['bmi_level'] = raw_df.apply(bmi_level, axis=1)
+kmeans = KMeans(n_clusters=8, random_state=0)
+lat_long_pred = kmeans.fit_predict(clean_df[["lat", "long"]])
+print(lat_long_pred.size)
+clean_df['lat_long_cluster'] = lat_long_pred
+
+clean_df = clean_df.reset_index(drop=True)
 #///////////////////////////////////////////////////////////////////////
-def hypothesis_testing(feature, target):
-    g = pd.crosstab(feature, target, margins=True)
-    chi2_result = chi2_contingency(g)
-    return chi2_result[1]
+import matplotlib.pyplot as plt
+fig, axes = plt.subplots(figsize=(10,10))
+plt.scatter(x=clean_df['lat'], y=clean_df['long'], c=lat_long_pred)
+plt.show()
+#///////////////////////////////////////////////////////////////////////
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer 
+sid_obj = SentimentIntensityAnalyzer()
 
-df_cols = raw_df.columns
-drop_list = []
+description_dict = {"description_negative":[], "description_neutral": [], "description_positive":[]}
 
-for i in tqdm(range(len(df_cols)), position=0, leave=True):
-    p = hypothesis_testing(raw_df[df_cols[i]], raw_df['cardio'])
-    
-    if p >= 0.05:
-        drop_list.append(df_cols[i])
-        
-print(drop_list)
-raw_df.drop(drop_list, axis=1, inplace=True)
-joblib.dump(drop_list, './pickles/drop_columns.pkl')
+
+loop = clean_df.shape[0]
+for i in tqdm(range(loop), position=0, leave=True):
+    desc = str(clean_df.description[i])
+    sentiment_dict = sid_obj.polarity_scores(desc) 
+    description_dict["description_negative"].append(sentiment_dict["neg"])
+    description_dict["description_neutral"].append(sentiment_dict["neu"])
+    description_dict["description_positive"].append(sentiment_dict["pos"]) 
+#///////////////////////////////////////////////////////////////////////
+desc_df = pd.DataFrame(description_dict)
+print(desc_df.shape)
+desc_df.head()
 
 #///////////////////////////////////////////////////////////////////////
-raw_df.corr()
-f, ax = plt.subplots(figsize=(12, 10))
-sns.heatmap(raw_df.corr(), annot=True, linewidths=0.5, square=True, vmax=0.3, center=0, cmap=sns.cubehelix_palette())
-plt.savefig('correlation_heat_map.png')
+clean_df = pd.concat([clean_df, desc_df], axis=1)
+clean_df = clean_df.drop(["description"], axis=1)
 #///////////////////////////////////////////////////////////////////////
-clean_data = raw_df.copy()
-clean_data = pd.get_dummies(clean_data,drop_first=False)
-clean_data.to_csv('clean_df.csv', index = False)
-
+clean_df.corr()
+f, ax = plt.subplots(figsize=(16, 16))
+sns.heatmap(clean_df.corr(), annot=True, linewidths=0.5, square=True, 
+            vmax=0.3, center=0, cmap=sns.cubehelix_palette())
 #///////////////////////////////////////////////////////////////////////
-## Data Normalization
-clean_df = pd.read_csv("clean_df.csv")
-
-df_X = clean_df.drop(["cardio"], axis=1)
-df_y = clean_df.loc[:, "cardio"]
-df_X = df_X.reindex(sorted(df_X.columns), axis=1)
-
-print(df_X.info())
 #///////////////////////////////////////////////////////////////////////
-joblib.dump(df_X.columns, './pickles/data_columns.pkl')
+df = clean_df.copy()
+df.dropna(inplace=True)
+df.shape
+#///////////////////////////////////////////////////////////////////////
+df = pd.get_dummies(df,drop_first=False)
+print(df.head())
+#///////////////////////////////////////////////////////////////////////
+df_X = df.drop(["id", "price"], axis=1)
+df_y = df.loc[:, "price"]
 #///////////////////////////////////////////////////////////////////////
 scaler = MinMaxScaler()
 df_X = scaler.fit_transform(df_X)
 print(df_X)
-joblib.dump(scaler, './pickles/std_scaler.pkl') 
 #///////////////////////////////////////////////////////////////////////
-X_train, X_test, y_train, y_test = train_test_split(df_X, df_y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(df_X, df_y, 
+                                                    test_size=0.2, 
+                                                    random_state=42)
 #///////////////////////////////////////////////////////////////////////
-def model_evaluation(y_test, y_pred):
-    cm = confusion_matrix(y_test, y_pred)
+def calculate_regression_metrics(y_test, predictions):
+    mean_squared_error = skmetrics.mean_squared_error(y_test, predictions)
+    mean_absolute_error = skmetrics.mean_absolute_error(y_test, predictions)
+    r2_error = skmetrics.r2_score(y_test, predictions)
 
-    print("Confusion Matrix:")
-    print(cm, end="\n\n")
-
-    TN = cm[0, 0]
-    FN = cm[0, 1]
-    FP = cm[1, 0]
-    TP = cm[1, 1]
-
-    P = FN+TP
-    N = TN+FP
-
-    TPR = TP/P
-    TNR = TN/N
-    FPR = FP/N
-    FNR = FN/P
-
-    accuracy = (TN+TP)/(P+N)
-    print("Test Accuracy: "+str(accuracy), end="\n\n")
-    print("All 4 parameters: ",TN, FN, FP, TP, end="\n\n")
-    print("TPR: {}".format(TPR))
-    print("TNR: {}".format(TNR))
-    print("FPR: {}".format(FPR))
-    print("FNR: {}".format(FNR))
-    print()
-    
-    print(classification_report(y_test, y_pred))
+    result = {'mean_squared_error': mean_squared_error, 'mean_absolute_error': mean_absolute_error, 'r2_score': r2_error}
+    return result 
 #///////////////////////////////////////////////////////////////////////
-xgb_model = xgb.XGBClassifier()
-xgb_model.fit(X_train, y_train)
-print("Training Accuracy: "+str(xgb_model.score(X_train, y_train)), end="\n\n")
-xgb_pred = xgb_model.predict(X_test)
-model_evaluation(y_test, xgb_pred)
-#/////////////////////////////////////////////////////////////////////
-# classifier.save('classifier_model.h5')
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+
+model = RandomForestRegressor()
+model = model.fit(X_train, y_train)
+pred = model.predict(X_test)
+pred = pred.reshape(-1, 1)
+
+print(pred)
+print("//////////////////////////////////////")
+print(y_test)
+print("//////////////////////////////////////")
+
+calculate_regression_metrics(y_test, pred)
+#///////////////////////////////////////////////////////////////////////
+
+#///////////////////////////////////////////////////////////////////////
+
+#///////////////////////////////////////////////////////////////////////
+
+#///////////////////////////////////////////////////////////////////////
+
+#///////////////////////////////////////////////////////////////////////
+
+#///////////////////////////////////////////////////////////////////////
 joblib.dump(xgb_model, './pickles/classifier_model.pkl') 
 
 
