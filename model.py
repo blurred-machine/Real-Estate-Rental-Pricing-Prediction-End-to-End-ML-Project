@@ -89,6 +89,9 @@ try:
 except:
     pass
 #///////////////////////////////////////////////////////////////////////
+raw_df["laundry_options_na"] = 0
+raw_df["laundry_options_na"][raw_df["laundry_options"][raw_df["laundry_options"].isna()==True].index] = 1
+#///////////////////////////////////////////////////////////////////////
 decide_cols = ["beds", "baths", "cats_allowed", "dogs_allowed", 
                "smoking_allowed", "wheelchair_access", 
                "electric_vehicle_charge", "comes_furnished", "price" ]
@@ -109,6 +112,10 @@ raw_df["laundry_options"][raw_df["laundry_options"].isna()==True] = laundry_pred
 #after imputation
 print(raw_df["laundry_options"].value_counts())
 print(raw_df["laundry_options"].isna().sum())
+#///////////////////////////////////////////////////////////////////////
+#///////////////////////////////////////////////////////////////////////
+raw_df["parking_options_na"] = 0
+raw_df["parking_options_na"][raw_df["parking_options"][raw_df["parking_options"].isna()==True].index] = 1
 #///////////////////////////////////////////////////////////////////////
 decide_cols = ["beds", "baths", "cats_allowed", "dogs_allowed", 
                "smoking_allowed", "wheelchair_access", "electric_vehicle_charge",
@@ -143,6 +150,7 @@ try:
 except:
     pass
 #///////////////////////////////////////////////////////////////////////
+'''
 def sqfeet_range_column(data, feature='sqfeet'):
     if data[feature] < 300:
         return 'single room'
@@ -162,6 +170,7 @@ def sqfeet_range_column(data, feature='sqfeet'):
 
 clean_df['sqfeet_range'] = clean_df.apply(sqfeet_range_column, axis=1)
 clean_df.sqfeet_range.value_counts()
+'''
 #///////////////////////////////////////////////////////////////////////
 '''
 sse={}
