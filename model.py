@@ -32,6 +32,8 @@ from sklearn.preprocessing import PowerTransformer
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import f1_score
 from sklearn import metrics as skmetrics
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
 
 from sklearn.cluster import KMeans
 from sklearn.neighbors import KNeighborsClassifier
@@ -188,7 +190,6 @@ clean_df['lat_long_cluster'] = lat_long_pred
 
 clean_df = clean_df.reset_index(drop=True)
 #///////////////////////////////////////////////////////////////////////
-import matplotlib.pyplot as plt
 fig, axes = plt.subplots(figsize=(10,10))
 plt.scatter(x=clean_df['lat'], y=clean_df['long'], c=lat_long_pred)
 plt.show()
@@ -240,19 +241,16 @@ X_train, X_test, y_train, y_test = train_test_split(df_X, df_y,
                                                     random_state=42)
 #///////////////////////////////////////////////////////////////////////
 def calculate_regression_metrics(y_test, predictions):
-    mean_squared_error = skmetrics.mean_squared_error(y_test, predictions)
-    mean_absolute_error = skmetrics.mean_absolute_error(y_test, predictions)
+    mse = skmetrics.mean_squared_error(y_test, predictions)
+    mae = skmetrics.mean_absolute_error(y_test, predictions)
     r2_error = skmetrics.r2_score(y_test, predictions)
 
-    result = {'mean_squared_error': mean_squared_error, 'mean_absolute_error': mean_absolute_error, 'r2_score': r2_error}
+    result = {'mean_squared_error': mse, 'mean_absolute_error': mae, 'r2_score': r2_error}
     return result 
 #///////////////////////////////////////////////////////////////////////
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error
-
-model = RandomForestRegressor()
-model = model.fit(X_train, y_train)
-pred = model.predict(X_test)
+regressor_model = RandomForestRegressor()
+regressor_model.fit(X_train, y_train)
+pred = regressor_model.predict(X_test)
 pred = pred.reshape(-1, 1)
 
 print(pred)
@@ -272,7 +270,7 @@ calculate_regression_metrics(y_test, pred)
 #///////////////////////////////////////////////////////////////////////
 
 #///////////////////////////////////////////////////////////////////////
-joblib.dump(xgb_model, './pickles/classifier_model.pkl') 
+joblib.dump(model, './pickles/classifier_model.pkl') 
 
 
 
