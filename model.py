@@ -27,8 +27,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.cluster import KMeans
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
-
-
+import xgboost as xgb
 
 #///////////////////////////////////////////////////////////////////////
 df = pd.read_csv("housing_train.csv")
@@ -136,7 +135,7 @@ print(raw_df.isnull().sum())
 raw_df.dropna(inplace=True)
 
 clean_df = raw_df.copy()
-clean_df.describe()
+print(clean_df.describe())
 #///////////////////////////////////////////////////////////////////////
 #///////////////////////////////////////////////////////////////////////
 try:
@@ -163,6 +162,20 @@ def sqfeet_range_column(data, feature='sqfeet'):
 
 clean_df['sqfeet_range'] = clean_df.apply(sqfeet_range_column, axis=1)
 clean_df.sqfeet_range.value_counts()
+#///////////////////////////////////////////////////////////////////////
+'''
+sse={}
+lat_long_df = clean_df[['lat', 'long']]
+
+for k in tqdm(range(1, 12), position=0, leave=True):
+    kmeans = KMeans(n_clusters=k, max_iter=1000).fit(lat_long_df)
+    lat_long_df["clusters"] = kmeans.labels_
+    sse[k] = kmeans.inertia_ 
+plt.figure()
+plt.plot(list(sse.keys()), list(sse.values()))
+plt.xlabel("Number of cluster")
+plt.show()
+'''
 #///////////////////////////////////////////////////////////////////////
 kmeans = KMeans(n_clusters=8, random_state=0)
 lat_long_pred = kmeans.fit_predict(clean_df[["lat", "long"]])
@@ -234,29 +247,34 @@ def calculate_regression_metrics(y_test, predictions):
     result = {'MSE': mse, 'MAE': mae, 'R2 score': r2_error}
     return result 
 #///////////////////////////////////////////////////////////////////////
-regressor_model = RandomForestRegressor()
-regressor_model.fit(X_train, y_train)
+    '''
+regressor_model = xgb.XGBRegressor(n_jobs=4, tree_method='gpu_hist')
+regressor_model = regressor_model.fit(X_train, y_train)
 pred = regressor_model.predict(X_test)
+
 pred = pred.reshape(-1, 1)
 
 print(pred)
 print("//////////////////////////////////////")
 print(y_test)
 print("//////////////////////////////////////")
-
+    
 print(calculate_regression_metrics(y_test, pred))
+'''
 #///////////////////////////////////////////////////////////////////////
+random_regressor = RandomForestRegressor(n_jobs=-1)
+random_regressor.fit(X_train, y_train)
+random_regressor_pred = random_regressor.predict(X_test)
+random_regressor_pred = random_regressor_pred.reshape(-1, 1)
 
-#///////////////////////////////////////////////////////////////////////
+print(random_regressor_pred)
+print("//////////////////////////////////////")
+print(y_test)
+print("//////////////////////////////////////")
 
+print(calculate_regression_metrics(y_test, random_regressor_pred))
 #///////////////////////////////////////////////////////////////////////
-
-#///////////////////////////////////////////////////////////////////////
-
-#///////////////////////////////////////////////////////////////////////
-
-#///////////////////////////////////////////////////////////////////////
-joblib.dump(regressor_model, './pickles/regressor_model.pkl') 
+joblib.dump(random_regressor, './pickles/random_regressor.pkl') 
 
 
 
