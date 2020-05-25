@@ -32,6 +32,14 @@ def predict():
     df_input = df_input.astype('int')
     print(df_input.info())
     
+    sample_df = pd.DataFrame(columns = data_columns)
+    main_df = sample_df.append(df_input)
+    main_df = main_df.fillna(0)
+    print("MAIN DATAFRAME")
+    print(main_df)
+    print(main_df.info())
+    print()
+    
     return flask.render_template('index.html', predicted_value="{}".format(str(pred_val)), any_message=msg)
 
 
