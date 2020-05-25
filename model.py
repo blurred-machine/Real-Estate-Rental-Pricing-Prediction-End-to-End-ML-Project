@@ -140,15 +140,15 @@ print(raw_df["parking_options"].isna().sum())
 #///////////////////////////////////////////////////////////////////////
 print(raw_df.isnull().sum())
 raw_df.dropna(inplace=True)
-
 clean_df = raw_df.copy()
 print(clean_df.describe())
-#///////////////////////////////////////////////////////////////////////
 #///////////////////////////////////////////////////////////////////////
 try:
     clean_df = clean_df.drop(['url', 'region_url', 'image_url'], axis=1)
 except:
     pass
+#///////////////////////////////////////////////////////////////////////
+
 #///////////////////////////////////////////////////////////////////////
 '''
 def sqfeet_range_column(data, feature='sqfeet'):
@@ -188,6 +188,8 @@ plt.show()
 #///////////////////////////////////////////////////////////////////////
 kmeans = KMeans(n_clusters=8, random_state=0)
 lat_long_pred = kmeans.fit_predict(clean_df[["lat", "long"]])
+print(joblib.dump(kmeans, './pickles/lat_long_classifier.pkl'))
+
 print(lat_long_pred.size)
 clean_df['lat_long_cluster'] = lat_long_pred
 
@@ -227,6 +229,7 @@ sns.heatmap(clean_df.corr(), annot=True, linewidths=0.5, square=True,
 #///////////////////////////////////////////////////////////////////////
 #///////////////////////////////////////////////////////////////////////
 df = clean_df.copy()
+df = df.reindex(sorted(df.columns), axis=1)
 df.dropna(inplace=True)
 df.shape
 #///////////////////////////////////////////////////////////////////////
@@ -235,14 +238,16 @@ print(df.head())
 #///////////////////////////////////////////////////////////////////////
 df_X = df.drop(["id", "price"], axis=1)
 df_y = df.loc[:, "price"]
+print("FINAL DF BEFORE TRAINING: ///////////////")
+print(df_X.head())
 
-joblib.dump(df_X.columns, './pickles/data_columns.pkl') 
+print(joblib.dump(df_X.columns, './pickles/data_columns.pkl'))
 #///////////////////////////////////////////////////////////////////////
 scaler = MinMaxScaler()
 df_X = scaler.fit_transform(df_X)
 print(df_X)
 
-joblib.dump(scaler, './pickles/min_max_scaler.pkl') 
+print(joblib.dump(scaler, './pickles/min_max_scaler.pkl'))
 #///////////////////////////////////////////////////////////////////////
 X_train, X_test, y_train, y_test = train_test_split(df_X, df_y, 
                                                     test_size=0.2, 
@@ -283,7 +288,7 @@ print("//////////////////////////////////////")
 
 print(calculate_regression_metrics(y_test, random_regressor_pred))
 #///////////////////////////////////////////////////////////////////////
-joblib.dump(random_regressor, './pickles/random_regressor.pkl') 
+print(joblib.dump(random_regressor, './pickles/random_regressor.pkl'))
 
 
 
