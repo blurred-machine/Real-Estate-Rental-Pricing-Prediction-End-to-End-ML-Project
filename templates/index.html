@@ -16,6 +16,7 @@
 
 <div class="login-page">
   <div class="form">
+    <h3>Please fill the following property details:</h3>
     <form class="login-form" action="/predict" method="POST">
       <input name="id" type="number" class="input_text" placeholder="House unique ID" required>
       <input name="url" type="text" class="input_text" placeholder="House Listing URL">
@@ -46,7 +47,7 @@
       <hr>
 
 
-      <h4>Accessabilities</h4>
+      <h4>Accessibility</h4>
 
       <span class="binary_label"><label>Are Cats Allowed?</label></span>
       <label for="cats_allowed_yes">
@@ -54,7 +55,7 @@
       </label>
       <label for="cats_allowed_no">
         <input class="radio-inline" type="radio" id="cats_allowed_no" name="cats_allowed" value="0">No
-      </label><br><br><br>
+      </label><br><br><br><br><br>
 
       <span class="binary_label"><label>Are Dogs Allowed?</label></span>
       <label for="dogs_allowed_yes">
@@ -167,6 +168,10 @@
 
       <button>Predict</button>
       <h3 class="message">Have "csv" data? <a href="#">Predict multiple</a></h3>
+
+      <h3>{{predicted_value}}</h3>
+      <h4>{{any_message}}</h4>
+
     </form>
 
 
@@ -184,6 +189,10 @@
       <input type="file" class="input_text" name="file_upload" id="txtFileUpload" accept=".csv" required />
       <button>Predict Multiple</button>
       <h3 class="message">Have single input? <a href="#">Predict single</a></h3>
+
+      <h3>{{predicted_value_multi}}</h3>
+      <h4>{{any_message_multi}}</h4>
+
     </form>
 
 
