@@ -175,7 +175,7 @@
     </form>
 
 
-    <form class="register-form" action="/predict-multi" method="POST">
+    <form class="register-form" id="upload-form" action="/predict_multiple" method="POST">
       <div id="multipage_rules">
         <h3>Rules:</h3>
         <ul>
@@ -190,9 +190,15 @@
       <button>Predict Multiple</button>
       <h3 class="message">Have single input? <a href="#">Predict single</a></h3>
 
-      <h3>{{predicted_value_multi}}</h3>
-      <h4>{{any_message_multi}}</h4>
 
+        <div id="result_val" style="line-height: 0em; height: 0em; overflow: hidden;">
+          <h3>{{predicted_value_multi}}</h3>
+        </div>
+        <h3>
+          <h4>{{any_message_multi}}</h4>
+        </h3>
+        <br>
+  
     </form>
 
 
@@ -202,6 +208,7 @@
 <!-- partial -->
   <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/script.js') }}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.1.2/papaparse.min.js"></script>
 
 </body>
 </html>
