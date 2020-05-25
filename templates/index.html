@@ -12,9 +12,10 @@
 </head>
 <body>
 <!-- partial:index.partial.html -->
+<h2 id="main_heading">Real Estate Rental Price Prediction</h2>
+
 <div class="login-page">
   <div class="form">
-
     <form class="login-form" action="/predict" method="POST">
       <input name="id" type="number" class="input_text" placeholder="House unique ID" required>
       <input name="url" type="text" class="input_text" placeholder="House Listing URL">
@@ -117,10 +118,51 @@
         </select>
 
       <input name="image_url" type="text" class="input_text" placeholder="House Image URL">
-      <textarea name="description" class="input_text" rows="4" cols="50" placeholder="Description"></textarea>
+      <textarea name="description" class="input_text" rows="4" cols="50" placeholder="Description (Enter description about the Property)"></textarea>
+      <input name="lat" type="number" min="19.50139" max="64.85694" step="any" class="input_text" placeholder="Latitude (only US)" required>
+      <input name="long" type="number" min="-161.75583" max="-68.01197" step="any" class="input_text" placeholder="Longitude (only US)" required>
 
-      <input name="state" type="text" class="input_text" placeholder="State">
-
+      <label>State</label>
+        <select name="state" class="input_text" required>
+          <option value="ca">ca</option>
+          <option value="fl">fl</option>
+          <option value="nc">nc</option>
+          <option value="mi">mi</option>
+          <option value="ga">ga</option>
+          <option value="co">co</option>
+          <option value="ny">ny</option>
+          <option value="il">il</option>
+          <option value="ks">ks</option>
+          <option value="ia">ia</option>
+          <option value="mn">mn</option>
+          <option value="md">md</option>
+          <option value="la">la</option>
+          <option value="az">az</option>
+          <option value="oh">oh</option>
+          <option value="in">in</option>
+          <option value="al">al</option>
+          <option value="nj">nj</option>
+          <option value="ky">ky</option>
+          <option value="ms">ms</option>
+          <option value="ma">ma</option>
+          <option value="id">id</option>
+          <option value="ct">ct</option>
+          <option value="nd">nd</option>
+          <option value="ar">ar</option>
+          <option value="nm">nm</option>
+          <option value="nv">nv</option>
+          <option value="ne">ne</option>
+          <option value="dc">dc</option>
+          <option value="ak">ak</option>
+          <option value="mo">mo</option>
+          <option value="de">de</option>
+          <option value="hi">hi</option>
+          <option value="nh">nh</option>
+          <option value="mt">mt</option>
+          <option value="me">me</option>
+          <option value="ok">ok</option>
+          <option value="or">or</option>          
+        </select>
 
 
       <button>Predict</button>
@@ -128,19 +170,21 @@
     </form>
 
 
-    <form class="register-form" action="/predict" method="POST">
-      <input type="file" class="input" name="file_upload" id="txtFileUpload" accept=".csv" required />
+    <form class="register-form" action="/predict-multi" method="POST">
+      <div id="multipage_rules">
+        <h3>Rules:</h3>
+        <ul>
+          <li>Upload multiple houses data in ".csv" format.</li>
+          <li><a href="#">Sample data can be downloaded from here.</a></li>
+          <li>Internet connectivity is required!</li>
+          <li>Please verify the data with the sample file. It should have same column names.</li>
+          <li>Enjoy Renting!</li>
+        </ul>
+      </div>
+      <input type="file" class="input_text" name="file_upload" id="txtFileUpload" accept=".csv" required />
       <button>Predict Multiple</button>
       <h3 class="message">Have single input? <a href="#">Predict single</a></h3>
     </form>
-
-
-
-
-
-
-    
-
 
 
 
