@@ -188,17 +188,100 @@
       </div>
       <input type="file" class="input_text" name="file_upload" id="txtFileUpload" accept=".csv" required />
       <button>Predict Multiple</button>
+      <div class="hr">
+        <div id="result_val" style="line-height: 0em; height: 0em; overflow: hidden;">
+        {{predicted_value_multi}}
+        </div>
+        <h3>
+        {{any_message_multi}}
+        </h3>
+        <br>
+      </div>
+      <br>
+
+      <script>
+            function JSON2CSV(objArray) {
+                var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
+                var str = '';
+                var line = '';
+
+                if ($("#labels").is(':checked')) {
+                    var head = array[0];
+                    if ($("#quote").is(':checked')) {
+                        for (var index in array[0]) {
+                            var value = index + "";
+                            line += '"' + value.replace(/"/g, '""') + '",';
+                        }
+                    } else {
+                        for (var index in array[0]) {
+                            line += index + ',';
+                        }
+                    }
+
+                    line = line.slice(0, -1);
+                    str += line + '\r\n';
+                }
+
+                for (var i = 0; i < array.length; i++) {
+                    var line = '';
+
+                    if ($("#quote").is(':checked')) {
+                        for (var index in array[i]) {
+                            var value = array[i][index] + "";
+                            line += '"' + value.replace(/"/g, '""') + '",';
+                        }
+                    } else {
+                        for (var index in array[i]) {
+                            line += array[i][index] + ',';
+                        }
+                    }
+
+                    line = line.slice(0, -1);
+                    str += line + '\r\n';
+                }
+                return str;
+            }
+
+
+            function download(text) {
+                // var element = document.createElement('a');
+                // element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+                // element.setAttribute('download', 'cardio_predictions.txt');
+                // element.style.display = 'none';
+                // document.body.appendChild(element);
+                // element.click();
+                // document.body.removeChild(element);
+
+                var json = $.parseJSON(text);
+              var csv = JSON2CSV(json);
+              var downloadLink = document.createElement("a");
+              var blob = new Blob(["\ufeff", csv]);
+              var url = URL.createObjectURL(blob);
+              downloadLink.href = url;
+              downloadLink.download = "house_rent_predictions.csv";
+
+              document.body.appendChild(downloadLink);
+              downloadLink.click();
+              document.body.removeChild(downloadLink);
+            }
+
+              var my_text = document.getElementById("result_val").innerText;  
+              console.log("mmt: "+my_text)
+              if(/\S/.test(my_text)){
+                var res = confirm("Download final Prediction?\nThe file will be downloaded in txt format with house id and predicted rent price. \n\n{{any_message_multi}}");
+                if(res){
+                  download(my_text);
+                }
+              } 
+      </script>
+
+
+
       <h3 class="message">Have single input? <a href="#">Predict single</a></h3>
 
 
-        <div id="result_val" style="line-height: 0em; height: 0em; overflow: hidden;">
-          <h3>{{predicted_value_multi}}</h3>
-        </div>
-        <h3>
-          <h4>{{any_message_multi}}</h4>
-        </h3>
-        <br>
-  
+        
+
     </form>
 
 
