@@ -31,27 +31,18 @@ def clean_data(raw_df):
 
 
 def feature_engineer_data(clean_df):
-    print("test0: ###########################")
-    print(clean_df.shape)
     try:
         clean_df = clean_df.drop(['id', 'url', 'region_url', 'image_url', 'description'], axis=1)
     except:
         print("Custom Error: drop columns did not execute!!")
     
     lat_long_pred = lat_long_classifier.predict(clean_df[["lat", "long"]])
-    print("test1: ###########################")
-    print(clean_df.shape)
     clean_df['lat_long_cluster'] = lat_long_pred
     clean_df = clean_df.reset_index(drop=True)
     clean_df = clean_df.reindex(sorted(clean_df.columns), axis=1)
     clean_df.fillna(-1)
-    
-    print("test2: ###########################")
-    print(clean_df.shape)
-    
+        
     clean_df = pd.get_dummies(clean_df,drop_first=True)
-    print("test3: ###########################")
-    print(clean_df.shape)
     return clean_df
 
 def scale_data(df):
@@ -79,8 +70,7 @@ def process_input_data(df_input):
     clean_df = clean_data(df_input)
     print('FEATURING DATA.............')
     df_featured = feature_engineer_data(clean_df)  
-    print("test4: ###########################")
-    print(df_featured.shape)
+
     print("DATA COLUMNS: //////////////")
     print(data_columns)
     sample_df = pd.DataFrame(columns = data_columns)

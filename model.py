@@ -186,7 +186,7 @@ plt.xlabel("Number of cluster")
 plt.show()
 '''
 #///////////////////////////////////////////////////////////////////////
-kmeans = KMeans(n_clusters=8, random_state=0)
+kmeans = KMeans(n_clusters=8, random_state=42, n_jobs=-1)
 lat_long_pred = kmeans.fit_predict(clean_df[["lat", "long"]])
 print(joblib.dump(kmeans, './pickles/lat_long_classifier.pkl'))
 
