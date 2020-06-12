@@ -38,3 +38,16 @@
 - Sources	Craigslist.org
 - Dataset owner	Austin Reese
 - Date created	2020-01-07
+
+## Implementation
+### Project access Link:
+[http://ec2-18-188-83-100.us-east-2.compute.amazonaws.com:8088](http://ec2-18-188-83-100.us-east-2.compute.amazonaws.com:8088)
+
+### Project Code Link:
+[https://github.com/blurred-machine/Real-Estate-Rental-Pricing-Prediction](https://github.com/blurred-machine/Real-Estate-Rental-Pricing-Prediction)
+
+### Project demo video Link:
+[https://www.youtube.com/watch?v=PO_off_VSnY&t](https://www.youtube.com/watch?v=PO_off_VSnY&t)
+
+## Author
+- Paras Varshney
